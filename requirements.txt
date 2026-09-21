@@ -4,6 +4,5 @@ matplotlib
 tensorflow-datasets
 importlib_resources
 bs4
-kagglehub
 scikit-learn
 mlxtend
