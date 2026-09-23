@@ -1,0 +1,30 @@
+# Anmerkung:
+# - Jede Faltungsschicht wird mit dem Padding same konfiguriert.
+# - Optimizer: Adam
+# - Lostfunktion: CategoricalCrossentropy, da 3 Kategorien in dem Format One-hot vorliegen.
+# - BatchSize: 20
+# - EarlyStopping: ja, daher kann die Anzahl der Epochen mit maximalem Wert gesetzt werden.
+# - Optionale Funktionalitäten: Dropout Schicht, Regularisierung durch BatchNormierung und
+#                               vom L2-Strafterm
+
+@startuml
+title CNN Architecture
+
+:Eingabegröße 40x40x1;
+:Faltungsschicht mit 3x3 Kernel
+und 18 Merkmalskarten;
+-> (batch_size x 40 x 40 x 18);
+:Max-Poolingsschicht mit 2x2 Kernel;
+-> (batch_size x 20 x 20 x 18);
+:Faltungsschicht mit 3x3 Kernel
+und 10 Merkmalskarten;
+-> (batch_size x 20 x 20 x 10);
+:Max-Poolingsschicht mit 2x2 Kernel;
+-> (batch_size x 10 x 10 x 10);
+:Eine Flatten Schicht, um die Ausgabe bzw.
+den Tensor vom Rang 3 auf 2 umzuwandeln;
+->(batch_size x 1000);
+:Eine verdeckte Schicht mit 12 Neuronen;
+->(batch_size x 12);
+:Ausgabeschicht mit 3 Neuronen;
+@enduml
