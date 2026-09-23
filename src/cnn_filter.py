@@ -129,7 +129,7 @@ optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3)
 # CategoricalCrossentropy, wenn ein Bild exklusiv einer Shadenskategorie gehoert.
 model.compile(optimizer=optimizer,
               loss=tf.keras.losses.BinaryCrossentropy(),
-              metrics=['accuracy', 'precision'])
+              metrics=['accuracy', 'precision', 'f1_score'])
 
 # Das Modellsummary anzeigen lassen
 model.summary()
