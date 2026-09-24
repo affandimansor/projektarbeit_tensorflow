@@ -75,12 +75,12 @@ ds_train_valid = ds.take(n_train_valid)
 ds_train_orig = ds_train_valid.take(n_train)
 ds_valid_orig = ds_train_valid.skip(n_train)
 
-# Ein Batch mit der Laenge n_train erstellen
-ds_test_batch = next(iter(ds_train_orig.batch(batch_size=n_train)))
+# Ein Batch mit der Laenge von n_train erstellen, um auf jeweilige Spalte in der ds_train_orig zuzugreifen
+ds_train_batch = next(iter(ds_train_orig.batch(batch_size=n_train)))
 
 # Klassenverteilung in der Trainingsdatenmenge
 print("\n***** Class distribution ds_training *****")
-print_results_categories(tf.reduce_sum(ds_test_batch[1], axis=0))
+print_results_categories(tf.reduce_sum(ds_train_batch[1], axis=0))
 
 # MiniBatches aus den beiden Datenmengen erstellen‚
 ds_train = ds_train_orig.batch(BATCH_SIZE, drop_remainder=True)
@@ -102,6 +102,7 @@ model.add(tf.keras.Input(shape=(40, 40, 1), batch_size=BATCH_SIZE))
 model.add(tf.keras.layers.Conv2D(
     filters=NUM_FILTER_CONV_1,
     kernel_size=(3, 3),
+    padding='same',
     data_format='channels_last',
     activation='relu',
     name = 'conv_1'))
@@ -152,15 +153,29 @@ model.compile(optimizer=optimizer,
               metrics=['accuracy', 'precision', 'f1_score'])
 
 # Das Modellsummary anzeigen lassen
-model.summary()
+
+# ModellCheckpoint einrichten
+# Dateipfad zum Abspeichern des Modells
+cp_filepath = './checkpoint.model.keras'
+
+# Die callback Funktion ModelCheckpoint
+# Die Metrik precision ist als das Entscheidungskriterium ausgewaehlt, da positive
+# und negative Daten ungleich viel sind. 
+model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
+    filepath=cp_filepath,
+    monitor='precision',
+    mode='max',
+    save_best_only=True
+)
 
 # Das Modell trainieren
 history = model.fit(ds_train, epochs=NUM_EPOCHS,
           validation_data=ds_valid,
-            #class_weight={0:1,1:1,2:1},
-         shuffle=True,
-        callbacks=[tf.keras.callbacks.EarlyStopping(monitor='accuracy', patience=3)]
-          )
+         #class_weight={0:1.2, 1:1, 2:1.6},
+        callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=3), 
+                   model_checkpoint_callback],
+        verbose=0
+        )
 
 # Trainingsergebnis anzeigen
 hist = history.history
