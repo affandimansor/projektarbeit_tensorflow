@@ -52,14 +52,15 @@ NUM_HIDDEN  = 12
 # --------------------------------
 # Fuer Reproduzierbarkeit
 tf.random.set_seed(1)
+keras.utils.set_random_seed(1)
+tf.config.experimental.enable_op_determinism()
 
 # Die beiden Tensoren zu einem Datensatz kombinieren
 ds = tf.data.Dataset.from_tensor_slices((t_X, t_y))
 
 # Die Datenmenge durchmischen
-ds = ds.shuffle(buffer_size=BUFFER_SIZE,
-                reshuffle_each_iteration=True)
-
+ds = ds.shuffle(buffer_size=BUFFER_SIZE, seed=1,
+                reshuffle_each_iteration=False)
 
 # Verhaeltnis Trainings- zu Testdatenmenge in Prozent 80:20
 n_train_valid = np.uint16(0.8 * len(X_std))
@@ -73,6 +74,13 @@ ds_train_valid = ds.take(n_train_valid)
 # Die Trainingsdatenmenge weiter in Training und Valid aufteilen
 ds_train_orig = ds_train_valid.take(n_train)
 ds_valid_orig = ds_train_valid.skip(n_train)
+
+# Ein Batch mit der Laenge n_train erstellen
+ds_test_batch = next(iter(ds_train_orig.batch(batch_size=n_train)))
+
+# Klassenverteilung in der Trainingsdatenmenge
+print("\n***** Class distribution ds_training *****")
+print_results_categories(tf.reduce_sum(ds_test_batch[1], axis=0))
 
 # MiniBatches aus den beiden Datenmengen erstellen‚
 ds_train = ds_train_orig.batch(BATCH_SIZE, drop_remainder=True)
