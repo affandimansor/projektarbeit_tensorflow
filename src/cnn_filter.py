@@ -45,7 +45,8 @@ BATCH_SIZE = 15
 NUM_EPOCHS = 20
 NUM_FILTER_CONV_1 = 18
 NUM_FILTER_CONV_2 = 10
-NUM_HIDDEN  = 12
+NUM_HIDDEN  = 10
+INPUT_SHAPE = t_X.shape[1:]
 
 # --------------------------------
 # X und y in einen Datensatz kombinieren
@@ -96,7 +97,7 @@ ds_test = ds.skip(n_train_valid)
 model = tf.keras.Sequential(name='cnn_filter')
 
 # Eine Eingabeschicht
-model.add(tf.keras.Input(shape=(40, 40, 1), batch_size=BATCH_SIZE))
+model.add(tf.keras.Input(shape=INPUT_SHAPE, batch_size=BATCH_SIZE))
 
 # Erste Faltungsschicht
 model.add(tf.keras.layers.Conv2D(
@@ -205,74 +206,48 @@ print_results_categories(hist['f1_score'][-1])
 # # Confusion Matrix
 # # --------------------------------
 # Jede Komponente der Trainingsdaten separat extrahieren
-X_train, y_train = next(iter(ds_train_orig.batch(batch_size=len(ds_train_orig))))
+X_train, y_train = ds_train_batch
 
-# Confusion Matrix berechnen
-cm = metrics.multilabel_confusion_matrix(y_train, np.round(model.predict(X_train)))
+# # Vorhersage mit den Trainingsdaten treffen
+y_pred = model(X_train)
+
+# # Confusion Matrix berechnen
+cm = metrics.multilabel_confusion_matrix(y_train, np.round(y_pred))
 
 # Jede Confusion Matrix anzeigen
 print("\n***** Confusion Matrix Training *****")
 print_results_categories(cm, sep='\n')
 
-# # 3 Subplots, jeweils fuer eine Confusion Matrix
-# fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+# Debugging
+#y_pred = model(X_train)
+cm = metrics.multilabel_confusion_matrix(y_train, np.round(y_pred), samplewise=True)
 
-# # Jede Matrix separat nebeneinander plotten
-# for i, ax in enumerate(axes):
-#     sns.heatmap(cm[i], 
-#                 annot=True, 
-#                 fmt='d', 
-#                 cmap='YlGn', 
-#                 ax=ax, 
-#                 cbar=(i == 2), # Show colorbar only on the last plot
-#                 xticklabels=["Pred Negative", "Pred Positive"],
-#                 yticklabels=["True Negative", "True Positive"])
-#                 #? TODO: F1-Score mit aufzeichnen
-#     ax.set_title(labels[i])
+def print_sample_info(i, sample_cm):
+    print(f"Sample {i}:\n{sample_cm}")
+    print("y_true: \n", y_train[i].numpy())
+    print("y_pred: \n", y_pred[i].numpy())
 
-# plt.suptitle("Confusion Matrix of each defect", fontsize=14, y=1.03)
-# plt.tight_layout()
-# plt.show()
+cnt_true_pos = 0
+cnt_false_pos = 0
+cnt_true_neg = 0
+cnt_false_neg = 0
 
-# --------------------------------
-# Auswertung (ohne Kategorie)
-# --------------------------------
-def label_with_error(y):
-    return np.any(y >= 1, axis=-1).astype(np.uint8)
+for i, sample_cm in enumerate(cm):
+    # CM von Samples anzeigen, die als falsches Negativ vorhergesagt wurden
+    if ((sample_cm[1,0] > 0)):
+        #print_sample_info(i, sample_cm)
+        cnt_false_neg+=1
 
-# Ein Batch mit der Laenge von ds_test erstellen
-batch_test = next(iter(ds_test.batch(batch_size=len(ds_test))))
+    # CM von Samples anzeigen, die als falsches Positiv vorhergesagt wurden
+        if ((sample_cm[0,1] > 0)):
+            print_sample_info(i, sample_cm)
+            cnt_false_pos+=1
 
-# Greife auf jeweilige Spalte in der ds_test zu
-X_test, y_test = batch_test
+    # CM von Samples anzeigen, die richtig als Positiv vorhergesagt wurden
+            if ((sample_cm[1,1] > 0)):
+                #print_sample_info(i, sample_cm)
+                cnt_true_pos+=1
 
-# Arrays zum Zwischenspeichern der kategorienlosen y-Werte
-y_true_test = np.zeros(len(ds_test), dtype=np.uint8)
-y_pred_test = np.zeros(len(ds_test), dtype=np.uint8)
-
-# y_true in kategorienlos umwandeln
-for i, y in enumerate(y_test):
-    y_true_test[i] = label_with_error(y)
-
-# Vohersage mit den Testdaten treffen
-y_pred = model(X_test)
-
-# y_pred in kategorienlos umwandeln
-for i, y in enumerate(y_pred):
-    y_pred_test[i] = label_with_error(np.round(y))
-
-# Die Ergebnisse auf der Terminal ausgeben
-print("\n***** Auswertung ohne Kategorie *****")
-print(y_true_test, "n_labels_true: ", len(y_true_test), "n_defects_true: ", np.count_nonzero(y_true_test))
-print(y_pred_test, "n_labels_pred: ", len(y_pred_test), "n_defects_pred: ", np.count_nonzero(y_pred_test))
-print(f"  Accuracy:  {metrics.accuracy_score(y_true_test, y_pred_test):.3f}")
-print(f"  Precision:  {metrics.precision_score(y_true_test, y_pred_test):.3f}")
-print(f"  F1-Score:  {metrics.f1_score(y_true_test, y_pred_test):.3f}")
-
-# --------------------------------
-# Confusion Matrix
-# --------------------------------
-cm = metrics.multilabel_confusion_matrix(batch_test[1], np.round(model.predict(batch_test[0])))
-for i, label in enumerate(['Point defects', 'Hole point defects', 'Split defects']):
-    print(f"Confusion matrix for {label}:")
-    print(cm[i])
+print("False negativ:", cnt_false_neg)
+print("False positiv:", cnt_false_pos)
+print("True positiv:", cnt_true_pos)
