@@ -13,6 +13,10 @@ import seaborn as sns
 # Das Merkmal einlesen
 X = np.load("../Material/data.npy")
 
+# Die Bildaufloesung bzw. resolution anpassen
+if config.PIC_RES != X.shape[1:3]:
+    X = X[:, :config.PIC_RES[0], :config.PIC_RES[1], :]
+
 # Den gemittelten Pixelwert berechnen
 mean = np.mean(X)
 
