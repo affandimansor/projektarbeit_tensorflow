@@ -2,7 +2,6 @@ numpy
 tensorflow>=2.0.0
 matplotlib
 tensorflow-datasets
-importlib_resources
-bs4
 scikit-learn
-mlxtend
+seaborn
+scikeras
