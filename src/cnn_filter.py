@@ -6,7 +6,7 @@ import sklearn.metrics as metrics
 from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+from config import FilterConfig as config
 # --------------------------------
 # Die Daten einlesen
 # --------------------------------
@@ -56,15 +56,15 @@ INPUT_SHAPE = t_X.shape[1:]
 # X und y in einen Datensatz kombinieren
 # --------------------------------
 # Fuer Reproduzierbarkeit
-tf.random.set_seed(1)
-keras.utils.set_random_seed(1)
+tf.random.set_seed(config.SEED)
+keras.utils.set_random_seed(config.SEED)
 tf.config.experimental.enable_op_determinism()
 
 # Die beiden Tensoren zu einem Datensatz kombinieren
 ds = tf.data.Dataset.from_tensor_slices((t_X, t_y))
 
 # Die Datenmenge durchmischen
-ds = ds.shuffle(buffer_size=BUFFER_SIZE, seed=1,
+ds = ds.shuffle(buffer_size=config.NUM_PIC, seed=1,
                 reshuffle_each_iteration=False)
 
 # Verhaeltnis Trainings- zu Testdatenmenge in Prozent 80:20
@@ -88,8 +88,8 @@ print("\n***** Class distribution ds_training *****")
 print_results_categories(tf.reduce_sum(ds_train_batch[1], axis=0))
 
 # MiniBatches aus den beiden Datenmengen erstellen‚
-ds_train = ds_train_orig.batch(BATCH_SIZE, drop_remainder=True)
-ds_valid = ds_valid_orig.batch(BATCH_SIZE, drop_remainder=True)
+ds_train = ds_train_orig.batch(config.BATCH_SIZE, drop_remainder=True)
+ds_valid = ds_valid_orig.batch(config.BATCH_SIZE, drop_remainder=True)
 
 # Die letzten 20-Prozent der gesamten Datenmenge in Testdatenmenge reinziehen
 ds_test = ds.skip(n_train_valid)
@@ -101,12 +101,12 @@ ds_test = ds.skip(n_train_valid)
 model = tf.keras.Sequential(name='cnn_filter')
 
 # Eine Eingabeschicht
-model.add(tf.keras.Input(shape=INPUT_SHAPE, batch_size=BATCH_SIZE))
+model.add(tf.keras.Input(shape=config.INPUT_SHAPE, batch_size=config.BATCH_SIZE))
 
 # Erste Faltungsschicht
 model.add(tf.keras.layers.Conv2D(
-    filters=NUM_FILTER_CONV_1,
-    kernel_size=(3, 3),
+    filters=config.NUM_FILTER_CONV_1,
+    kernel_size=config.KERNEL_CONV_1,
     padding='same',
     data_format='channels_last',
     activation='relu',
@@ -114,20 +114,20 @@ model.add(tf.keras.layers.Conv2D(
 
 # Erste Max-Poolingsschicht
 model.add(tf.keras.layers.MaxPool2D(
-    pool_size=(2,2),
+    pool_size=config.KERNEL_MAX_POOL_1,
     name='pool_1'))
 
 # Zweite Faltungsschicht
 model.add(tf.keras.layers.Conv2D(
-    filters=NUM_FILTER_CONV_2,
-    kernel_size=(3, 3),
+    filters=config.NUM_FILTER_CONV_2,
+    kernel_size=config.KERNEL_CONV_2,
     data_format='channels_last',
     activation='relu',
     name = 'conv_2'))
 
 # Zweite Max-Poolingsschicht
 model.add(tf.keras.layers.MaxPool2D(
-    pool_size=(2, 2),
+    pool_size=config.KERNEL_MAX_POOL_2,
     name='pool_2'))
 
 # Flatten Schicht um den Tensor aus Rang 3 in 2 umzuwandeln
@@ -135,7 +135,7 @@ model.add(tf.keras.layers.Flatten(name='flat'))
 
 # Die verdeckte Schicht
 model.add(tf.keras.layers.Dense(
-    NUM_HIDDEN,
+    config.NUM_HIDDEN,
     activation='relu',
     name='hidden_1'
 ))
@@ -148,7 +148,7 @@ model.add(tf.keras.layers.Dense(
 ))
 
 # Den Adam Optimizer definieren
-optimizer = tf.keras.optimizers.Adam(learning_rate=1e-3)
+optimizer = tf.keras.optimizers.Adam(learning_rate=config.LEARN_RATE)
 
 # Das Modell kompilieren
 # BinaryCrossEntropy, da ein Bild mehreren Schadenkategorien zugeordnet werden kann.
@@ -174,7 +174,7 @@ model_checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
 )
 
 # Das Modell trainieren
-history = model.fit(ds_train, epochs=NUM_EPOCHS,
+history = model.fit(ds_train, epochs=config.NUM_EPOCHS,
           validation_data=ds_valid,
          #class_weight={0:1.2, 1:1, 2:1.6},
         callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=3), 
