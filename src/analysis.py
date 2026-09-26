@@ -5,7 +5,7 @@ import sklearn.metrics as metrics
 import matplotlib.pyplot as plt
 import seaborn as sns
 from utils import print_results_categories
-from config import LABELS
+from config import LABELS, EXAMPLE_FILEPATH, CM_FILEPATH
 
 # --------------------------------
 # Confusion Matrix
@@ -53,6 +53,7 @@ def confusion_matrix(y_train, y_pred, multilabel=True):
                     yticklabels=yticklabels)
         plt.title("Confusion Matrix ohne Fehlerkategorien")
     plt.tight_layout()
+    plt.savefig(CM_FILEPATH)
     plt.show()
 
 
@@ -91,9 +92,11 @@ def analysis_uncategorized_defects(y_true, y_pred, ds=''):
 # --------------------------------
 # Ein Bild aus dem Datensatz darstellen
 # --------------------------------
-def visualize_image(img):
+def visualize_image(img, title):
     # Das Bild wird auf Diagramm mit der Achsenskala [0,1] geplottet 
     plt.imshow(img, extent=(0,1,0,1), interpolation='nearest')
+    plt.title(title)
+    plt.savefig(EXAMPLE_FILEPATH)
     plt.show()
 
 # --------------------------------
@@ -106,16 +109,16 @@ def barchart_metrics(values, deltas, datasets=['train', 'test'], metrics=['acccu
     br1 = np.arange(len(metrics))
     br2 = [x + barWidth for x in br1]
 
-    plt.bar(br1, values[0,:], color = 'b', width=barWidth,
+    plt.bar(br1, values[0][:], color = 'b', width=barWidth,
             label=datasets[0])
-    plt.bar(br2, values[1,:], color = 'g', width=barWidth,
+    plt.bar(br2, values[1][:], color = 'g', width=barWidth,
             label=datasets[1])
 
     #? TODO: Add annotation to each bar
 
     plt.xlabel("Metrics", fontweight="bold", fontsize=15)
     plt.ylabel("Values", fontweight="bold", fontsize=15)
-    plt.xticks([r + barWidth/2 for r in range(len(metrics))], metrics)
+    plt.xticks([r + barWidth/2 for r in br1], metrics) #range(len(metrics))], metrics)
 
     plt.legend()
     plt.show()
