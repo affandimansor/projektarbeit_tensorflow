@@ -1,20 +1,25 @@
 """ Alle Hyperparameter und Pfade sind hier zentral aufgelistet """
 
-# Gibt an, ob ein Modell erneut trainiert werden muss. Sonst wird nur das bestehende
-# Modell bewertet.
-TRAINING:   bool = False
+# Modi fuer Training
+TRAINING:   bool    = False
+VERBOSE:    int     = 1
 
 # Fehlerkategorien
 LABELS:     str = ['Point defects', 'Hole point defects', 'Split defects']
 
+# Analysiskonfigurationen
+IMG_DIRPATH = "./images"
+EXAMPLE_FILEPATH = IMG_DIRPATH + "/example_image.png"
+CM_FILEPATH = IMG_DIRPATH + "/confusion_matrix.png"
+
 # Konfiguration des neuronalen Netzwerks
 class FilterConfig:
-    SEED:                   int     = 10
+    SEED:                   int     = 15
     NUM_PIC:                int     = 10000
-    PIC_RES:                int     = [38, 38]
-    BATCH_SIZE:             int     = 15
-    NUM_EPOCHS:             int     = 15
-    NUM_FILTER_CONV_1:      int     = 16
+    PIC_RES:                int     = [36, 36]
+    BATCH_SIZE:             int     = 20
+    NUM_EPOCHS:             int     = 20
+    NUM_FILTER_CONV_1:      int     = 24
     KERNEL_CONV_1:          int     = [3, 3]
     KERNEL_MAX_POOL_1:      int     = [2, 2]
     NUM_FILTER_CONV_2:      int     = 10
