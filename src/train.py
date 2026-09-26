@@ -4,7 +4,7 @@
 import tensorflow as tf
 import numpy as np
 from config import FilterConfig as config
-from config import TRAINING
+from config import TRAINING, VERBOSE
 from utils import print_results_categories
 from dataset import create_datasets
 from model import cnn_filter
@@ -40,7 +40,7 @@ if TRAINING:
                         validation_data=ds_valid,
                         callbacks=[tf.keras.callbacks.EarlyStopping(monitor='val_loss', patience=3, restore_best_weights=True), 
                         model_checkpoint_callback],
-                        verbose=1)
+                        verbose=VERBOSE)
 
     # Trainingsergebnis anzeigen
     hist = history.history
@@ -103,9 +103,9 @@ d_acc = y_test_acc - y_train_acc
 d_prec = y_test_prec - y_train_prec
 d_f1 = y_test_f1 - y_train_f1
 
-metrics = np.array([[y_train_acc, y_train_prec, y_train_f1],
-                    [y_test_acc, y_test_prec, y_test_f1]])
-print(metrics[0,:])
+metrics = [[y_train_acc, y_train_prec, y_train_f1],
+           [y_test_acc, y_test_prec, y_test_f1]]
+
 # Balkendiagramm anzeigen
 barchart_metrics(values=metrics, deltas=d_acc)
 
@@ -113,4 +113,4 @@ barchart_metrics(values=metrics, deltas=d_acc)
 # Darstellung eines Beispielsdiagramms
 # --------------------------------
 # Zeige das erste Bild im ds_test mit Fehler an
-visualize_image(X_test[np.argmax(y_true_test > 0)])
+visualize_image(X_test[np.argmax(y_true_test > 0)], "Defect example")
