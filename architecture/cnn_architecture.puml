@@ -10,17 +10,17 @@
 @startuml
 title CNN Architecture
 
-:Eingabegröße 40x40x1;
+:Eingabegröße 36x436x1;
 :Faltungsschicht mit 3x3 Kernel
-und 18 Merkmalskarten;
--> (batch_size x 40 x 40 x 18);
+und 24 Merkmalskarten;
+-> (batch_size x 36 x 36 x 24);
 :Max-Poolingsschicht mit 2x2 Kernel;
--> (batch_size x 20 x 20 x 18);
+-> (batch_size x 18 x 18 x 24);
 :Faltungsschicht mit 3x3 Kernel
 und 10 Merkmalskarten;
--> (batch_size x 20 x 20 x 10);
+-> (batch_size x 16 x 16 x 10);
 :Max-Poolingsschicht mit 2x2 Kernel;
--> (batch_size x 10 x 10 x 10);
+-> (batch_size x 8 x 8 x 10);
 :Eine Flatten Schicht, um die Ausgabe bzw.
 den Tensor vom Rang 3 auf 2 umzuwandeln;
 ->(batch_size x 1000);

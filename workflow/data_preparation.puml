@@ -5,22 +5,24 @@ Zum Vergleich der Groesse dieser Dimension zw. einem rgb- und graustufigen
 Bild siehe /Users/affandimansor/Weiterbildung_velpTEC/TensorFlow/Kapitel_2/uebung_2_u_03.py
 # Skalieren die Pixelwerte um maximalen Wert, um das Problem mit verschwindenden Gradienten
 zu vermeiden.
+# Bildauflösung von 40 x 40 auf 36 x 36:
+Fokus auf dem Bildbereich mit Fehlern liegen und
+dadurch stehen viel mehr erlernbare Parameter
+dem Modell zur Verfügung.
 
 @startuml
 title Workflow Data Preparation
 
-:Das Merkmal bzw. die Pixel und
-Labels aus jeweiliger .npy-Datei
-in den Workspace einlesen;
-:Die Pixelwerte werden durch
-z-Score standardziert;
-:Die zwei Datenmenge in zu einem
-Datensatz zusammenführen;
-:Den Datensatz in Trainings- und
-Testdatenmenge aufteilen;
-:Die Trainingsdatenmenge in zwei weitere
-Datenmengen nämlich Training und 
-Validierungsdatenmenge auteilen;
+:Bildauflösung auf
+36 x 36 verkleinert;
+:Die Pixelwerte werden mit
+z-Score standardiziert;
+:Die Datenmenge Merkmals und Labels
+zu einem Datensatz zusammenführen;
+:Den Datensatz in 80% Trainings- 
+und 20% Testsdatenmenge auteilen;
+:Die Trainingsdatenmenge in 80% Trainings- 
+und 20% Validierungsdatenmenge auteilen;
 :MiniBatches der Trainings- und
 Validierungsdatenmenge erstellen;
 @enduml
