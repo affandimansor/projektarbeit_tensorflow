@@ -3,9 +3,10 @@ import numpy as np
 import tensorflow as tf
 import sklearn.metrics as metrics
 import matplotlib.pyplot as plt
+import matplotlib
 import seaborn as sns
 from utils import print_results_categories
-from config import LABELS, EXAMPLE_FILEPATH, CM_FILEPATH
+from config import LABELS, EXAMPLE_FILEPATH, CM_FILEPATH, BARCHART_FILEPATH
 
 # --------------------------------
 # Confusion Matrix
@@ -39,7 +40,7 @@ def confusion_matrix(y_train, y_pred, multilabel=True):
                         yticklabels=yticklabels)
                         #? TODO: F1-Score mit aufzeichnen
             ax.set_title(LABELS[i])
-        plt.suptitle("Confusion Matrix nach Fehlerkategorien", fontsize=14)
+        plt.suptitle("Confusion Matrix according to error classes", fontsize=14)
 
     # Auswertung ohne Fehlerkategorien
     else:
@@ -51,7 +52,7 @@ def confusion_matrix(y_train, y_pred, multilabel=True):
                     cbar=True,
                     xticklabels=xticklabels,
                     yticklabels=yticklabels)
-        plt.title("Confusion Matrix ohne Fehlerkategorien")
+        plt.title("Confusion Matrix without error classes")
     plt.tight_layout()
     plt.savefig(CM_FILEPATH)
     plt.show()
@@ -82,7 +83,7 @@ def analysis_uncategorized_defects(y_true, y_pred, ds=''):
     f1_score = metrics.f1_score(y_true_uncat, y_pred_uncat)
 
     # Die Ergebnisse auf der Terminal ausgeben
-    print(f"\n***** Auswertung ohne Kategorie {ds}*****")
+    print(f"\n***** Analysis without error classes {ds}*****")
     print(f"  Accuracy:  {accuracy:.3f}")
     print(f"  Precision:  {precision:.3f}")
     print(f"  F1-Score:  {f1_score:.3f}")
@@ -102,25 +103,28 @@ def visualize_image(img, title):
 # --------------------------------
 # Balkendiagramm zum Vergleich der Metriken
 # --------------------------------
-def barchart_metrics(values, deltas, datasets=['train', 'test'], metrics=['acccuracy', 'precision', 'f1_score']):
-    barWidth = 0.25
-    fig = plt.subplots(figsize=(15, 8))
+def barchart_metrics(values, deltas, datasets=['Train', 'Test'], metrics=['acccuracy', 'precision', 'f1_score']):
+    # Aus https://matplotlib.org/stable/gallery/lines_bars_and_markers/barchart.html#grouped-bar-chart-with-labels
+    fig, ax = plt.subplots(figsize=(10, 8))
 
-    br1 = np.arange(len(metrics))
-    br2 = [x + barWidth for x in br1]
+    # Jede Trainings- und Testbalken nach Metriken plotten
+    res = ax.grouped_bar([values[0], values[1]],
+                   tick_labels=metrics,
+                   labels=datasets,
+                   colors=['gold', 'mediumseagreen'])
 
-    plt.bar(br1, values[0][:], color = 'b', width=barWidth,
-            label=datasets[0])
-    plt.bar(br2, values[1][:], color = 'g', width=barWidth,
-            label=datasets[1])
-
-    #? TODO: Add annotation to each bar
+    # Jede Balken annotieren
+    for container in res.bar_containers:
+        ax.bar_label(container, paddin=3, fmt="{:,.3f}")
 
     plt.xlabel("Metrics", fontweight="bold", fontsize=15)
     plt.ylabel("Values", fontweight="bold", fontsize=15)
-    plt.xticks([r + barWidth/2 for r in br1], metrics) #range(len(metrics))], metrics)
+    plt.title("Model's generalization performance")
 
-    plt.legend()
+    # Das Legend ist ausserhalb des Graphs abgelegt, siehe https://matplotlib.org/stable/users/explain/axes/legend_guide.html#legend-location
+    plt.legend(title="Dataset", loc="upper left", bbox_to_anchor=(1, 1.01), 
+               title_fontproperties=matplotlib.font_manager.FontProperties(weight="bold"))
+    plt.savefig(BARCHART_FILEPATH)
     plt.show()
 
     

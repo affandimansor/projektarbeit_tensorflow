@@ -45,7 +45,7 @@ if TRAINING:
     # Trainingsergebnis anzeigen
     hist = history.history
 
-    print("\n***** Trainingsergebnis *****")
+    print("\n***** Training results *****")
     print("Picture resolution: ", config.PIC_RES)
     print("loss_training: ", hist['loss'][-1])
     print("accuracy_training: ", hist['accuracy'][-1])
@@ -56,7 +56,7 @@ if TRAINING:
 # ------------------------------
 # Das abgespeicherte Modell gegenchecken
 # ------------------------------
-print("\n***** Auswertung des abgespeicherten Modells mit Trainingsdaten (nach Kategorien) *****")
+print("\n***** Analysis of the saved model with training data (Categorised error) *****")
 
 # Das abgespeicherte Modell reinladen
 model = tf.keras.models.load_model(config.CHECKPOINT_FILEPATH)
@@ -67,7 +67,7 @@ results = model.evaluate(ds_train,
 print(model.summary())
 
 # Das Ergebnis der Evaluierung anzeigen
-print("\n***** Auswertung nach Kategorien mit Trainingsdaten *****")
+print("\n***** Results *****")
 print("loss_training: ", results['loss'])
 print("accuracy_training: ", results['accuracy'])
 print("precision_training: ", results['precision'])
