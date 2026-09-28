@@ -11,6 +11,7 @@ LABELS:     str = ['Point defects', 'Hole point defects', 'Split defects']
 IMG_DIRPATH = "./images"
 EXAMPLE_FILEPATH = IMG_DIRPATH + "/example_image.png"
 CM_FILEPATH = IMG_DIRPATH + "/confusion_matrix.png"
+BARCHART_FILEPATH = IMG_DIRPATH + "/barchart.png"
 
 # Konfiguration des neuronalen Netzwerks
 class FilterConfig:
